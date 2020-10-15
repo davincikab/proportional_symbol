@@ -9,10 +9,35 @@
 <style>
 	body { margin: 0; padding: 0; }
 	#map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    .mapboxgl-popup-content {
+        padding: 0;
+    }
+
+    .mapboxgl-popup-close-button {
+        color:white;
+        font-size: 1.5em;
+    }
+
+    .popup-content {
+        width: 200px;
+    }
+
+    .popup-content .popup-header {
+        margin:0;
+        font-size: 1.2em;
+        padding:0.5em;
+        color:white;
+        background-color: brown;
+    }
+
+    .popup-content p {
+        padding:0 1em;
+    }
 </style>
 </head>
 <body>
     <div id="map"></div>
-</script>
+    <script src="data.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>
