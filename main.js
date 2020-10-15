@@ -1,5 +1,5 @@
 // replace with your access token
-mapboxgl.accessToken = '';
+mapboxgl.accessToken = 'pk.eyJ1IjoiZGF1ZGk5NyIsImEiOiJjanJtY3B1bjYwZ3F2NGFvOXZ1a29iMmp6In0.9ZdvuGInodgDk7cv-KlujA';
 
 // create a map instance
 var map = new mapboxgl.Map({
@@ -18,12 +18,16 @@ var dummyGeojson = {
     "features": []
 };
 
+var pointId = null;
+var popup = new mapboxgl.Popup({closeOnClick:false});
+
 // wait for map to load to add data sources, interactivity etc
 map.on("load", function(e) {
     // create people data source
     map.addSource('people', {
         'type':'geojson',
-        'data':dummyGeojson
+        'data':dummyGeojson,
+        'generateId':true
     });
 
     // add a data layer for people data source
@@ -41,10 +45,10 @@ map.on("load", function(e) {
                 100,
                 100
             ],
-            'circle-color':'#f45050',
-            'circle-opacity':0.7,
+            'circle-color':'#ff0000',
+            'circle-opacity':0.2,
             'circle-stroke-width':1,
-            'circle-stroke-color':'#f44646'
+            'circle-stroke-color':['case', ['boolean', ['feature-state', 'hover'], !1], '#000', '#ff0000']
         },
         'layout':{
             'visibility':'visible'
@@ -52,11 +56,47 @@ map.on("load", function(e) {
     });
 
     // change the cursor
-    map.on("mouseenter",'people-layer', function(e){
+    map.on("mousemove", 'people-layer', function(e){
         map.getCanvas().style.cursor = 'pointer';
+
+        // features
+        if(e.features.length > 0) {
+            // check the point id
+            if(pointId) {
+                map.removeFeatureState({
+                    source: "people"
+                  });
+            }
+
+            pointId = e.features[0].id;
+
+            // updated the feature state
+            map.setFeatureState({
+                source:'people',
+                id:pointId
+            },{
+                hover:true
+            });
+
+            // update popup
+            updatePopup(e.features[0]);
+        }
     });
 
     map.on("mouseleave", "people-layer", function(e) {
+        // reset the pointId
+        if(pointId) {
+            map.setFeatureState({
+                source:'people',
+                id:pointId
+            },{
+                hover:false
+            });
+        }
+
+        pointId = null
+        
+        popup.remove();
         map.getCanvas().style.cursor = '';
     });
 
@@ -69,17 +109,7 @@ map.on("load", function(e) {
         if(features[0]) {
             let feature = features[0];
 
-            let htmlContent = "<div class='popup-content'>" + 
-                "<h5 class='popup-header'>" + feature.properties.name + "</h5>"+
-                "<p> Total " + feature.properties.total + "</p>"+
-             "</div>"
-
-            // create popup and add it to the map
-            new mapboxgl.Popup()
-                .setLngLat(feature.geometry.coordinates)
-                .setHTML(htmlContent)
-                .setMaxWidth("250")
-                .addTo(map);
+            updatePopup(feature);
         }
     });
 
@@ -87,10 +117,25 @@ map.on("load", function(e) {
     getData(1);
 });
 
+function updatePopup(feature) {
+    let htmlContent = "<div class='popup-content'>" + 
+        "<h5 class='popup-header'>" + feature.properties.name + "</h5>"+
+        "<p> Total " + feature.properties.total + "</p>"+
+    "</div>"
+
+    // create popup and add it to the map
+    popup
+        .setLngLat(feature.geometry.coordinates)
+        .setHTML(htmlContent)
+        .setMaxWidth("250")
+        .addTo(map);
+}
+
+
 // Extract the data from the api
 function getData(index) {
     let url = apiUrl + index;
-    fetch(url ,{
+    fetch("points.json" ,{
         mode: 'cors',
     })
     .then(response => response.json())
