@@ -2,8 +2,8 @@ mapboxgl.accessToken = 'pk.eyJ1IjoiZGF1ZGk5NyIsImEiOiJjanJtY3B1bjYwZ3F2NGFvOXZ1a
 var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/light-v10',
-    zoom: 3,
-    center: [18.712687550244368, 42.24007402814564]
+    zoom: 1.4,
+    center: [9.96420545488088, 25.499103553541858]
 });
 
 var apiUrl = "https://www.fullylinked.com/api/getStatistics/";
@@ -75,6 +75,7 @@ map.on("load", function(e) {
                 .addTo(map);
         }
     });
+
     // load data
     getData(1);
 });
@@ -82,8 +83,8 @@ map.on("load", function(e) {
 
 function getData(index) {
     let url = apiUrl + index;
-    fetch('points.json' ,{
-        mode: 'no-cors',
+    fetch(url ,{
+        mode: 'cors',
     })
     .then(response => response.json())
     .then(data => {
@@ -102,7 +103,7 @@ function createGeojson(data) {
     for (let i = 0; i < data.length; i++) {
         const element = data[i];
 
-        element.total = Math.floor(Math.random() * 20);
+        element.total = Math.floor(Math.random() * 5);
         let feature = {
             "type": "Feature",
             "geometry": {
