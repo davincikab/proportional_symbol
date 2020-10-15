@@ -13,13 +13,16 @@ var dummyGeojson = {
 };
 
 var allData;
+
+// wait for map to load to add data sources, interactivity etc
 map.on("load", function(e) {
-    // create a data
+    // create people data source
     map.addSource('people', {
         'type':'geojson',
         'data':dummyGeojson
     });
 
+    // add a data layer for people data source
     map.addLayer({
         'id':'people-layer',
         'source':'people',
@@ -44,7 +47,7 @@ map.on("load", function(e) {
         }
     });
 
-    // f44646
+    // change the cursor
     map.on("mouseenter",'people-layer', function(e){
         map.getCanvas().style.cursor = 'pointer';
     });
@@ -53,7 +56,7 @@ map.on("load", function(e) {
         map.getCanvas().style.cursor = '';
     });
 
-    // layer interaction
+    // layer interaction: display popup on click
     map.on("click", 'people-layer', function(e) {
         let features = map.queryRenderedFeatures(e.point,{
             layer:['peopple-layer']
@@ -67,7 +70,7 @@ map.on("load", function(e) {
                 "<p> Total " + feature.properties.total + "</p>"+
              "</div>"
 
-            // create popup
+            // create popup and add it to the map
             new mapboxgl.Popup()
                 .setLngLat(feature.geometry.coordinates)
                 .setHTML(htmlContent)
@@ -76,11 +79,11 @@ map.on("load", function(e) {
         }
     });
 
-    // load data
+    // load data with the given index
     getData(1);
 });
 
-
+// Extract the data from the api
 function getData(index) {
     let url = apiUrl + index;
     fetch(url ,{
@@ -88,7 +91,10 @@ function getData(index) {
     })
     .then(response => response.json())
     .then(data => {
+        // convert the json to geojson
         let geojson = createGeojson(data);
+
+        // update the people data source
         map.getSource('people').setData(geojson);
     })
     .catch(error => {
@@ -98,12 +104,13 @@ function getData(index) {
 
 
 function createGeojson(data) {
+    // creating a deep copy of dummyGeojso
     let geoObj = JSON.parse(JSON.stringify(dummyGeojson));
 
     for (let i = 0; i < data.length; i++) {
         const element = data[i];
 
-        element.total = Math.floor(Math.random() * 5);
+        // Create a point feature
         let feature = {
             "type": "Feature",
             "geometry": {
@@ -116,9 +123,10 @@ function createGeojson(data) {
             "properties":element
         }
         
+        // add the feature to feature array
         geoObj.features.push(feature);
     }
 
-    console.log(geoObj);
+    // return geojson data
     return geoObj;
 }
