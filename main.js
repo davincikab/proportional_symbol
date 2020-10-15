@@ -1,4 +1,7 @@
-mapboxgl.accessToken = 'pk.eyJ1IjoiZGF1ZGk5NyIsImEiOiJjanJtY3B1bjYwZ3F2NGFvOXZ1a29iMmp6In0.9ZdvuGInodgDk7cv-KlujA';
+// replace with your access token
+mapboxgl.accessToken = '';
+
+// create a map instance
 var map = new mapboxgl.Map({
     container: 'map',
     style: 'mapbox://styles/mapbox/light-v10',
@@ -6,13 +9,14 @@ var map = new mapboxgl.Map({
     center: [9.96420545488088, 25.499103553541858]
 });
 
+// data url
 var apiUrl = "https://www.fullylinked.com/api/getStatistics/";
+
+// empty geojson
 var dummyGeojson = {
     "type": "FeatureCollection",
     "features": []
 };
-
-var allData;
 
 // wait for map to load to add data sources, interactivity etc
 map.on("load", function(e) {
